@@ -32,10 +32,9 @@ prek install
 Now all of your files will be formatted on commit (you will need to re-commit after the formatting).
 
 ## Experiments
-1. Standard quantile
-2. Standard MVO
-3. CAPM MVO
-4. Fama 3 MVO
-5. Fama 5 MVO
-6. Barra MVO
-7. Volatility scaling?
+1. Standard MVO
+2. CAPM MVO
+3. Fama 3 MVO
+4. Fama 5 MVO
+5. Barra MVO
+6. Volatility scaling?
