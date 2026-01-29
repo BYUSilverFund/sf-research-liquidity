@@ -2,10 +2,10 @@ import datetime as dt
 from pathlib import Path
 
 import polars as pl
+import polars_ols as pls  # noqa
 import sf_quant.data as sfd
 import sf_quant.performance as sfp
 from dotenv import load_dotenv
-import polars_ols as pls
 
 from research.utils import run_backtest_parallel
 
@@ -49,62 +49,51 @@ assets = sfd.load_assets(
 )
 print(assets)
 
-ff = sfd.load_fama_french(
-    start=start,
-    end=end
-).select(
-    'date',
-    'mkt_rf',
-    'smb',
-    'hml',
-    'rf'
+ff = sfd.load_fama_french(start=start, end=end).select(
+    "date", "mkt_rf", "smb", "hml", "rf"
 )
 print(ff)
 
-data = assets.join(ff, on='date', how='left')
+data = assets.join(ff, on="date", how="left")
 
 ff_betas = (
-    data
-    .sort('barrid', 'date')
+    data.sort("barrid", "date")
     .with_columns(
-        pl.col('return').sub('rf').alias('return_rf'),
-        pl.lit(1.0).alias('const')
+        pl.col("return").sub("rf").alias("return_rf"), pl.lit(1.0).alias("const")
     )
     .with_columns(
-        pl.col('return_rf')
-        .least_squares
-        .rolling_ols(
-            pl.col('const', 'mkt_rf', 'smb', 'hml'), 
-            window_size=252, 
+        pl.col("return_rf")
+        .least_squares.rolling_ols(
+            pl.col("const", "mkt_rf", "smb", "hml"),
+            window_size=252,
             min_periods=252,
-            mode='coefficients'
+            mode="coefficients",
         )
-        .over('barrid')
-        .alias('B')
+        .over("barrid")
+        .alias("B")
     )
-    .unnest('B', separator="_")
+    .unnest("B", separator="_")
 )
 
 print(ff_betas)
 
 # Compute signal
 signals = (
-    ff_betas
-    .sort("barrid", "date")
+    ff_betas.sort("barrid", "date")
     .with_columns(
         pl.col("return_rf")
         .sub(
             pl.sum_horizontal(
-                pl.col('B_const'),
-                pl.col('B_mkt_rf').mul('mkt_rf'),
-                pl.col('B_smb').mul('smb'),
-                pl.col('B_hml').mul('hml')
+                pl.col("B_const"),
+                pl.col("B_mkt_rf").mul("mkt_rf"),
+                pl.col("B_smb").mul("smb"),
+                pl.col("B_hml").mul("hml"),
             )
         )
-        .alias('residual'),
+        .alias("residual"),
     )
     .with_columns(
-        pl.col('residual')
+        pl.col("residual")
         .log1p()
         .rolling_sum(230)
         .shift(21)
