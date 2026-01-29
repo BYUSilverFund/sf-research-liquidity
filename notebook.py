@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.19.4"
+__generated_with = "0.19.6"
 app = marimo.App(width="medium")
 
 
@@ -37,16 +37,11 @@ def _(mo):
 
     signal_names = mo.ui.multiselect(
         value=[
-            "momentum",
             "vol_scaled_momentum",
-            "capm_momentum",
-            # "vol_scaled_capm_momentum",
-            "ff3_momentum",
+            "vol_scaled_capm_momentum",
             "vol_scaled_ff3_momentum",
-            "ff5_momentum",
-            # "vol_scaled_ff5_momentum",
-            "barra_momentum",
-            # "vol_scaled_barra_momentum",
+            "vol_scaled_ff5_momentum",
+            "vol_scaled_barra_momentum",
         ],
         options=[
             "momentum",
@@ -80,6 +75,7 @@ def _(end, pl, signal_names, start):
             "ff5_momentum": 60,
             "vol_scaled_ff5_momentum": 60,
             "capm_momentum": 60,
+            "vol_scaled_capm_momentum": 60,
         }[signal_name]
         for signal_name in signal_names.value
     ]
